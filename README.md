@@ -32,11 +32,11 @@ cd D:\codex\旅游管理系统-20260622
 
 ## 项目结构
 
-- `tourism-backend`：Spring Boot 3 + MyBatis Plus + JWT + Spring Security + POI
-- `tourism-frontend`：Vue 3 + Vite + Element Plus + Axios + Pinia
-- `tourism-backend/src/main/resources/schema.sql`：演示模式自动建表
-- `tourism-backend/src/main/resources/data.sql`：演示模式自动数据
-- `tourism-backend/src/main/resources/application-mysql.yml`：可选 MySQL 配置模板
+- `logistics-backend`：Spring Boot 3 + MyBatis Plus + JWT + Spring Security + POI
+- `logistics-frontend`：Vue 3 + Vite + Element Plus + Axios + Pinia
+- `logistics-backend/src/main/resources/schema.sql`：演示模式自动建表
+- `logistics-backend/src/main/resources/data.sql`：演示模式自动数据
+- `logistics-backend/src/main/resources/application-mysql.yml`：可选 MySQL 配置模板
 
 ## 答辩演示流程
 

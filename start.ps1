@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Backend = Join-Path $Root "tourism-backend"
-$Frontend = Join-Path $Root "tourism-frontend"
+$Backend = Join-Path $Root "logistics-backend"
+$Frontend = Join-Path $Root "logistics-frontend"
 $Logs = Join-Path $Root "logs"
 New-Item -ItemType Directory -Force -Path $Logs | Out-Null
 
