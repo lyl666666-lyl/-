@@ -2,21 +2,21 @@
   <div>
     <div class="layout-top">
       <div class="brand" @click="$router.push('/home')">
-        <span class="brand-mark">旅</span>
-        <span>旅游管理系统</span>
+        <span class="brand-mark">物</span>
+        <span>智能在线物流系统</span>
       </div>
       <el-menu mode="horizontal" router :ellipsis="false">
-        <el-menu-item index="/home">首页</el-menu-item>
-        <el-menu-item index="/spots">景点</el-menu-item>
-        <el-menu-item index="/routes">线路</el-menu-item>
-        <el-menu-item v-if="store.isTourist" index="/my/orders">我的订单</el-menu-item>
-        <el-menu-item v-if="store.isTourist" index="/my/travelers">出行人</el-menu-item>
-        <el-menu-item v-if="store.isTourist" index="/my/after-sales">售后</el-menu-item>
-        <el-menu-item v-if="store.isTourist" index="/my/profile">个人中心</el-menu-item>
+        <el-menu-item index="/home">运单轨迹查询</el-menu-item>
+        <el-menu-item v-if="store.isSender" index="/booking">在线寄件下单</el-menu-item>
+        <el-menu-item v-if="store.isSender" index="/my/orders">我的寄件订单</el-menu-item>
+        <el-menu-item v-if="store.isSender" index="/my/profile">个人中心</el-menu-item>
       </el-menu>
       <div class="nav-actions">
-        <el-button v-if="!store.token" type="primary" @click="$router.push('/login')">登录</el-button>
-        <el-button v-else plain @click="logout">退出</el-button>
+        <el-button v-if="!store.token" type="primary" @click="$router.push('/login')">用户登录</el-button>
+        <div v-else style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 14px; color: #475569; font-weight: 500;">{{ store.user?.realName || store.user?.username }}</span>
+          <el-button plain size="small" @click="logout">退出</el-button>
+        </div>
       </div>
     </div>
     <main class="main"><router-view /></main>

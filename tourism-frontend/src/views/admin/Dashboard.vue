@@ -2,37 +2,41 @@
   <div>
     <section class="section-head" style="margin-top:0">
       <div>
-        <h2>运营仪表盘</h2>
-        <p class="muted">快速查看订单、核对、今日出行和销售金额，支持进入对应业务页面处理。</p>
+        <h2>物流运营仪表盘</h2>
+        <p class="muted">查看网点运单总量、异常件、已签收和当前运费收入汇总，便于高效调配专员及运力。</p>
       </div>
-      <el-button type="primary" @click="$router.push('/admin/orders')">处理待核对订单</el-button>
+      <el-button v-if="store.isAdmin" type="primary" @click="$router.push('/admin/orders')">查看订单明细</el-button>
+      <el-button v-else-if="store.isSpecialist" type="primary" @click="$router.push('/admin/collect')">进行分拣揽收</el-button>
     </section>
     <div class="stat-row">
       <div class="stat-card">
-        <div class="stat-label">订单总数</div>
-        <div class="stat-number">{{ s.orderCount || 0 }}</div>
+        <div class="stat-label">总运单量</div>
+        <div class="stat-number">{{ s.totalCount || 0 }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">待核对订单</div>
-        <div class="stat-number">{{ s.pendingCount || 0 }}</div>
+        <div class="stat-label">待揽收包裹</div>
+        <div class="stat-number" style="color: #ea580c;">{{ s.pendingCollectCount || 0 }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">今日出行</div>
-        <div class="stat-number">{{ s.todayTravelCount || 0 }}</div>
+        <div class="stat-label">异常包裹数</div>
+        <div class="stat-number" style="color: #dc2626;">{{ s.abnormalCount || 0 }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">总销售金额</div>
-        <div class="stat-number">￥{{ s.totalAmount || 0 }}</div>
+        <div class="stat-label">已签收完成</div>
+        <div class="stat-number" style="color: #16a34a;">{{ s.signedCount || 0 }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">预估运费收入</div>
+        <div class="stat-number" style="color: #0d9488;">￥{{ (s.totalAmount || 0).toFixed(2) }}</div>
       </div>
     </div>
     <div class="dashboard-panel">
-      <h3 style="margin-top:0">答辩演示建议流程</h3>
-      <el-steps :active="2" align-center>
-        <el-step title="维护线路" description="景点、线路、套餐" />
-        <el-step title="游客预订" description="出行人、日期、人数" />
-        <el-step title="订单核对" description="确认或退回修改" />
-        <el-step title="出行安排" description="导游、批次、提醒" />
-        <el-step title="售后报表" description="回复售后并导出" />
+      <h3 style="margin-top:0">在线物流系统演示闭环</h3>
+      <el-steps :active="store.isSpecialist ? 3 : 4" align-center style="margin-top: 30px;">
+        <el-step title="寄件下单" description="客户输入收发地址提交" />
+        <el-step title="上门揽收" description="专员扫码指定网点接收" />
+        <el-step title="干线中转" description="北京/上海等网点干线运输" />
+        <el-step title="配送签收" description="派送至终点收件人并签收" />
       </el-steps>
     </div>
   </div>
@@ -41,6 +45,23 @@
 <script setup>
 import { reactive, onMounted } from 'vue'
 import { adminOrderApi } from '../../api/modules'
-const s = reactive({})
-onMounted(async () => Object.assign(s, await adminOrderApi.stat({})))
+import { useUserStore } from '../../store/user'
+
+const store = useUserStore()
+const s = reactive({
+  totalCount: 0,
+  pendingCollectCount: 0,
+  abnormalCount: 0,
+  signedCount: 0,
+  totalAmount: 0
+})
+
+onMounted(async () => {
+  try {
+    const res = await adminOrderApi.stat()
+    Object.assign(s, res)
+  } catch (err) {
+    // 拦截器处理
+  }
+})
 </script>

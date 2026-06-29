@@ -1,212 +1,212 @@
 <template>
   <div class="page">
-    <section class="hero">
-      <div class="hero-copy">
-        <el-tag type="success" size="large">课程设计第 8 题 · 旅游管理系统</el-tag>
-        <h1>发现优质线路，完成从预订到出行的全流程管理</h1>
-        <p class="muted">系统覆盖景点展示、线路套餐、订单核对、导游安排、售后咨询 and 报表导出，适合答辩时演示完整业务闭环。</p>
-        <div class="hero-actions">
-          <el-button type="primary" size="large" @click="$router.push('/routes')">浏览热门线路</el-button>
-          <el-button size="large" @click="$router.push('/spots')">查看推荐景点</el-button>
-        </div>
-      </div>
-      <div class="carousel-wrapper">
-        <el-carousel trigger="click" height="380px" arrow="always" class="custom-carousel" :interval="4000">
-          <el-carousel-item v-for="(item, idx) in carouselItems" :key="idx">
-            <div class="carousel-card" @click="$router.push(item.link)">
-              <img :src="item.image" :alt="item.title" class="carousel-img">
-              <div class="carousel-overlay">
-                <div class="carousel-content">
-                  <span class="carousel-tag">{{ item.tag }}</span>
-                  <h3 class="carousel-title">{{ item.title }}</h3>
-                  <p class="carousel-desc">{{ item.desc }}</p>
-                </div>
-              </div>
-            </div>
-          </el-carousel-item>
-        </el-carousel>
+    <section class="hero" style="padding: 60px 40px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; text-align: center; border-radius: 24px;">
+      <el-tag type="primary" size="large" style="margin-bottom: 20px; font-weight: 700; border-radius: 8px;">在线物流系统 · 全程实时轨迹追踪</el-tag>
+      <h1 style="font-size: 36px; font-weight: 800; margin-bottom: 12px; color: var(--ink); letter-spacing: -0.02em;">随时随地 掌握包裹动态</h1>
+      <p style="color: var(--muted); max-width: 600px; margin-bottom: 30px; font-size: 16px; line-height: 1.6;">
+        输入运单号查询包裹的实时中转轨迹；输入收寄件人姓名可进行安全校验。
+      </p>
+
+      <!-- 运单查询卡片 -->
+      <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; padding: 24px; border: 1px solid rgba(79, 70, 229, 0.15); width: 100%; max-width: 680px; text-align: left; box-shadow: var(--shadow);">
+        <el-form :inline="true" :model="queryForm" style="display: flex; gap: 12px; margin-bottom: 0;" @submit.prevent="handleSearch">
+          <el-form-item style="flex: 2; margin-bottom: 0; margin-right: 0;">
+            <el-input v-model="queryForm.orderNo" placeholder="请输入运单号 (如: WL202606290001)" size="large" clearable />
+          </el-form-item>
+          <el-form-item style="flex: 1; margin-bottom: 0; margin-right: 0;">
+            <el-input v-model="queryForm.senderName" placeholder="收寄件人姓名(选填)" size="large" clearable />
+          </el-form-item>
+          <el-button type="primary" size="large" :loading="loading" @click="handleSearch">查询轨迹</el-button>
+        </el-form>
       </div>
     </section>
 
-    <section class="section-head">
-      <div>
-        <h2>热门线路</h2>
-        <p class="muted">按上架线路展示，可直接进入详情并提交预订。</p>
-      </div>
-      <el-button text type="primary" @click="$router.push('/routes')">全部线路</el-button>
-    </section>
-    <div class="card-grid">
-      <el-card v-for="r in routes" :key="r.id" class="travel-card">
-        <img class="cover" :src="r.coverImage">
-        <h3 class="card-title">{{ r.routeName }}</h3>
-        <p class="muted">{{ r.description }}</p>
-        <div class="card-meta">
-          <span class="price">￥{{ r.price }}</span>
-          <span class="pill">{{ r.days }} 天行程</span>
+    <!-- 查询结果展示区域 -->
+    <el-card v-if="trackResult" style="margin-bottom: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+      <template #header>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span style="font-weight: 700; font-size: 18px; color: #1e293b;">运单号：{{ trackResult.order.orderNo }}</span>
+            <el-tag :type="getStatusType(trackResult.order.status)" style="margin-left: 10px; font-weight: 600;">
+              {{ getStatusLabel(trackResult.order.status) }}
+            </el-tag>
+            <el-tag v-if="trackResult.order.isAbnormal === 1" type="danger" style="margin-left: 10px; font-weight: 600;">
+              异常件
+            </el-tag>
+          </div>
+          <div style="font-size: 14px; color: #64748b;">
+            下单时间：{{ trackResult.order.createTime }}
+          </div>
         </div>
-        <el-button type="primary" style="width:100%;margin-top:14px" @click="$router.push('/routes/'+r.id)">查看详情</el-button>
+      </template>
+
+      <!-- 运单详情卡片 -->
+      <div style="margin-bottom: 24px; background-color: #f8fafc; border-radius: 8px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; border: 1px solid #f1f5f9;">
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">寄件人</div>
+          <div style="font-weight: 600; color: #334155; font-size: 15px;">{{ maskName(trackResult.order.senderName) }}</div>
+          <div style="font-size: 13px; color: #64748b;">{{ trackResult.order.senderAddress }}</div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">收件人</div>
+          <div style="font-weight: 600; color: #334155; font-size: 15px;">{{ maskName(trackResult.order.receiverName) }}</div>
+          <div style="font-size: 13px; color: #64748b;">{{ trackResult.order.receiverAddress }}</div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">托寄物 / 重量</div>
+          <div style="font-weight: 600; color: #334155; font-size: 15px;">{{ trackResult.order.itemType }}</div>
+          <div style="font-size: 13px; color: #64748b;">{{ trackResult.order.weight }} kg</div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">运费 / 当前网点</div>
+          <div style="font-weight: 600; color: #334155; font-size: 15px;">￥{{ trackResult.order.price }}</div>
+          <div style="font-size: 13px; color: #64748b;">{{ trackResult.order.currentOutletName || '处理中' }}</div>
+        </div>
+      </div>
+
+      <!-- 异常情况警告 -->
+      <el-alert
+        v-if="trackResult.order.isAbnormal === 1"
+        title="物流异常提示"
+        type="warning"
+        :description="`快件异常原因：${trackResult.order.abnormalReason || '未知原因'}`"
+        show-icon
+        style="margin-bottom: 24px;"
+        :closable="false"
+      />
+
+      <!-- 时间线轨迹 -->
+      <h3 style="font-weight: 700; margin-bottom: 20px; font-size: 16px; color: #1e293b;">物流轨迹明细</h3>
+      <el-timeline style="margin-left: 10px;">
+        <el-timeline-item
+          v-for="(log, idx) in trackResult.logs"
+          :key="log.id"
+          :type="idx === 0 ? 'primary' : ''"
+          :color="idx === 0 ? '#0f766e' : ''"
+          :size="idx === 0 ? 'large' : 'normal'"
+          :timestamp="log.createTime"
+        >
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-weight: 700; font-size: 15px; color: #1e293b;">{{ log.nodeName }}</span>
+            <span style="font-size: 14px; color: #475569; line-height: 1.5;">{{ log.description }}</span>
+          </div>
+        </el-timeline-item>
+      </el-timeline>
+    </el-card>
+
+    <!-- 特色功能卡片展示 -->
+    <section class="section-head" style="margin-bottom: 20px;">
+      <div>
+        <h2 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 0 0 6px 0;">我们的服务优势</h2>
+        <p class="muted" style="margin: 0; color: #64748b; font-size: 14px;">智能化网点覆盖，全程精细化包裹运输管理</p>
+      </div>
+    </section>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px;">
+      <el-card shadow="hover" style="border-radius: 12px; text-align: center; border: 1px solid #f1f5f9;">
+        <div style="background-color: #f0fdf4; color: #16a34a; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 20px;">
+          <el-icon><Tickets /></el-icon>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1e293b;">在线寄件下单</h3>
+        <p style="font-size: 13.5px; color: #64748b; margin: 0; line-height: 1.5;">寄件人自助填写发收地址及托寄物信息，随时发布寄件订单。</p>
       </el-card>
-    </div>
 
-    <section class="section-head">
-      <div>
-        <h2>推荐景点</h2>
-        <p class="muted">景点与线路联动维护，便于管理员组织旅游产品。</p>
-      </div>
-    </section>
-    <div class="card-grid">
-      <el-card v-for="s in spots" :key="s.id" class="travel-card">
-        <img class="cover" :src="s.coverImage">
-        <h3 class="card-title">{{ s.name }}</h3>
-        <p><span class="pill">{{ s.level }}</span></p>
-        <p class="muted">{{ s.location }} · {{ s.description }}</p>
+      <el-card shadow="hover" style="border-radius: 12px; text-align: center; border: 1px solid #f1f5f9;">
+        <div style="background-color: #eff6ff; color: #2563eb; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 20px;">
+          <el-icon><Location /></el-icon>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1e293b;">专员上门揽收</h3>
+        <p style="font-size: 13.5px; color: #64748b; margin: 0; line-height: 1.5;">物流专员收到待处理包裹，快速上门，扫码揽收并完成分拣入库。</p>
+      </el-card>
+
+      <el-card shadow="hover" style="border-radius: 12px; text-align: center; border: 1px solid #f1f5f9;">
+        <div style="background-color: #faf5ff; color: #9333ea; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 20px;">
+          <el-icon><MapLocation /></el-icon>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1e293b;">干线中转路线</h3>
+        <p style="font-size: 13.5px; color: #64748b; margin: 0; line-height: 1.5;">管理员维护多条网点中转运输干线，科学调配干线物流运力。</p>
+      </el-card>
+
+      <el-card shadow="hover" style="border-radius: 12px; text-align: center; border: 1px solid #f1f5f9;">
+        <div style="background-color: #fff7ed; color: #ea580c; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 20px;">
+          <el-icon><Calendar /></el-icon>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1e293b;">签收反馈登记</h3>
+        <p style="font-size: 13.5px; color: #64748b; margin: 0; line-height: 1.5;">配送完毕后支持面对面签收登记，实时更新签收状态及时间点。</p>
       </el-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { routeApi, spotApi } from '../api/modules'
+import { ref, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
+import { orderApi } from '../api/modules'
+import { Tickets, Location, MapLocation, Calendar } from '@element-plus/icons-vue'
 
-const routes = ref([])
-const spots = ref([])
+const loading = ref(false)
+const queryForm = reactive({ orderNo: '', senderName: '' })
+const trackResult = ref(null)
 
-const carouselItems = ref([
-  {
-    title: '黄山三日摄影深色游',
-    tag: '摄影好去处',
-    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    desc: '云海、日出与徽派古村落，风光大片触手可及。',
-    link: '/routes/2'
-  },
-  {
-    title: '鼓浪屿三日亲子游',
-    tag: '亲子甄选',
-    image: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2',
-    desc: '浪漫琴岛慢旅行，阳光沙滩与手作体验，其乐融融。',
-    link: '/routes/4'
-  },
-  {
-    title: '杭州西湖二日休闲游',
-    tag: '周末首选',
-    image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b',
-    desc: '画舫游湖，雷峰夕照，寻觅最惬意的江南慢生活。',
-    link: '/routes/1'
-  },
-  {
-    title: '丽江雪山五日游',
-    tag: '神秘雪山',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-    desc: '壮丽冰川公园与神秘泸沽湖摩梭风情神秘走婚桥。',
-    link: '/routes/5'
+async function handleSearch() {
+  if (!queryForm.orderNo) {
+    ElMessage.warning('请输入运单号')
+    return
   }
-])
+  loading.value = true
+  try {
+    const res = await orderApi.track(queryForm.orderNo, queryForm.senderName)
+    trackResult.value = res
+  } catch (err) {
+    trackResult.value = null
+  } finally {
+    loading.value = false
+  }
+}
 
-onMounted(async () => {
-  routes.value = (await routeApi.list({ size: 6 })).records
-  spots.value = (await spotApi.list({ size: 6 })).records
-})
+function maskName(name) {
+  if (!name) return ''
+  if (name.length <= 1) return name
+  return name.charAt(0) + '*'.repeat(name.length - 1)
+}
+
+function getStatusLabel(status) {
+  const map = {
+    'PENDING_COLLECT': '待揽收',
+    'COLLECTED': '已揽收',
+    'IN_TRANSIT': '运输中',
+    'DELIVERING': '派送中',
+    'SIGNED': '已签收',
+    'CANCELLED': '已撤销'
+  }
+  return map[status] || status
+}
+
+function getStatusType(status) {
+  const map = {
+    'PENDING_COLLECT': 'info',
+    'COLLECTED': 'warning',
+    'IN_TRANSIT': 'primary',
+    'DELIVERING': 'primary',
+    'SIGNED': 'success',
+    'CANCELLED': 'danger'
+  }
+  return map[status] || 'info'
+}
 </script>
 
 <style scoped>
-.carousel-wrapper {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
 }
-
-.custom-carousel :deep(.el-carousel__button) {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.4);
-}
-
-.custom-carousel :deep(.el-carousel__indicator.is-active .el-carousel__button) {
-  background-color: #0f766e;
-  width: 20px;
-  border-radius: 4px;
-}
-
-.custom-carousel :deep(.el-carousel__arrow) {
-  background-color: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(4px);
-  color: #ffffff;
-  transition: all 0.2s ease;
-}
-
-.custom-carousel :deep(.el-carousel__arrow:hover) {
-  background-color: #0f766e;
-}
-
-.carousel-card {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.carousel-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.8s ease;
-}
-
-.carousel-card:hover .carousel-img {
-  transform: scale(1.03);
-}
-
-.carousel-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 35%, rgba(15, 23, 42, 0.85) 100%);
+.section-head {
   display: flex;
+  justify-content: space-between;
   align-items: flex-end;
-  padding: 30px 24px;
-}
-
-.carousel-content {
-  color: #ffffff;
-  width: 100%;
-}
-
-.carousel-tag {
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px);
-  color: #ffffff;
-  font-size: 11px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-weight: 700;
-  display: inline-block;
-  margin-bottom: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.carousel-title {
-  margin: 0 0 8px 0;
-  font-size: 22px;
-  font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.carousel-desc {
-  margin: 0;
-  font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-@media (max-width: 860px) {
-  .carousel-wrapper {
-    height: 320px;
-  }
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-top: 20px;
 }
 </style>

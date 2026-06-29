@@ -57,7 +57,7 @@ Push-Location $Backend
 & $mvnCmd -q -DskipTests package
 Pop-Location
 
-$jar = Join-Path $Backend "target\tourism-backend-1.0.0.jar"
+$jar = Join-Path $Backend "target\logistics-backend-1.0.0.jar"
 if (!(Test-Path $jar)) { throw "后端 jar 未生成：$jar" }
 
 Write-Host "正在启动后端：http://localhost:8080"
@@ -82,6 +82,8 @@ if (!(Wait-HttpOk "http://localhost:5173" 45)) {
 
 Write-Host "启动完成，正在打开浏览器..."
 Start-Process "http://localhost:5173"
-Write-Host "游客端/后台入口：http://localhost:5173"
-Write-Host "管理员：admin / 123456"
-Write-Host "游客：tourist1 / 123456"
+Write-Host "前台/后台入口：http://localhost:5173"
+Write-Host "测试账号（密码均为 123456）："
+Write-Host "  - 系统管理员：admin"
+Write-Host "  - 寄件客户：sender1"
+Write-Host "  - 物流专员：specialist1"

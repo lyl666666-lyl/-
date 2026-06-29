@@ -43,7 +43,7 @@ public class AuthController {
         user.setRealName(req.getRealName());
         user.setPhone(req.getPhone());
         user.setEmail(req.getEmail());
-        user.setRole("TOURIST");
+        user.setRole("SENDER");
         user.setStatus("ENABLE");
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());

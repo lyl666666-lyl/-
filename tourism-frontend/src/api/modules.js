@@ -1,12 +1,41 @@
 import request from '../utils/request'
 export const authApi = { login:d=>request.post('/api/auth/login',d), register:d=>request.post('/api/auth/register',d) }
 export const userApi = { profile:()=>request.get('/api/user/profile'), update:d=>request.put('/api/user/profile',d), password:d=>request.put('/api/user/password',d) }
-export const spotApi = { list:p=>request.get('/api/spots',{params:p}), detail:id=>request.get('/api/spots/'+id), add:d=>request.post('/api/admin/spots',d), update:(id,d)=>request.put('/api/admin/spots/'+id,d), del:id=>request.delete('/api/admin/spots/'+id), status:(id,status)=>request.put('/api/admin/spots/'+id+'/status',null,{params:{status}}) }
-export const routeApi = { list:p=>request.get('/api/routes',{params:p}), detail:id=>request.get('/api/routes/'+id), add:d=>request.post('/api/admin/routes',d), update:(id,d)=>request.put('/api/admin/routes/'+id,d), del:id=>request.delete('/api/admin/routes/'+id), on:id=>request.put('/api/admin/routes/'+id+'/on-sale'), off:id=>request.put('/api/admin/routes/'+id+'/off-sale') }
-export const packageApi = { list:p=>request.get('/api/packages',{params:p}), add:d=>request.post('/api/admin/packages',d), update:(id,d)=>request.put('/api/admin/packages/'+id,d), del:id=>request.delete('/api/admin/packages/'+id) }
-export const travelerApi = { list:()=>request.get('/api/travelers'), add:d=>request.post('/api/travelers',d), update:(id,d)=>request.put('/api/travelers/'+id,d), del:id=>request.delete('/api/travelers/'+id) }
-export const orderApi = { create:d=>request.post('/api/orders',d), my:()=>request.get('/api/orders/my'), detail:id=>request.get('/api/orders/'+id), update:(id,d)=>request.put('/api/orders/'+id,d), cancel:id=>request.delete('/api/orders/'+id+'/cancel'), arrangement:id=>request.get('/api/orders/'+id+'/arrangement') }
-export const adminOrderApi = { list:p=>request.get('/api/admin/orders',{params:p}), detail:id=>request.get('/api/admin/orders/'+id), confirm:id=>request.put('/api/admin/orders/'+id+'/confirm'), ret:(id,reason)=>request.put('/api/admin/orders/'+id+'/return',{reason}), start:id=>request.put('/api/admin/orders/'+id+'/start'), finish:id=>request.put('/api/admin/orders/'+id+'/finish'), archive:id=>request.put('/api/admin/orders/'+id+'/archive'), stat:p=>request.get('/api/admin/orders/statistics',{params:p}), export:p=>request.get('/api/admin/orders/export',{params:p,responseType:'blob'}) }
-export const guideApi = { list:()=>request.get('/api/admin/guides'), add:d=>request.post('/api/admin/guides',d), update:(id,d)=>request.put('/api/admin/guides/'+id,d), del:id=>request.delete('/api/admin/guides/'+id) }
-export const arrangementApi = { add:d=>request.post('/api/admin/arrangements',d), update:(id,d)=>request.put('/api/admin/arrangements/'+id,d) }
-export const afterSaleApi = { add:d=>request.post('/api/after-sales',d), my:()=>request.get('/api/after-sales/my'), admin:()=>request.get('/api/admin/after-sales'), reply:(id,d)=>request.put('/api/admin/after-sales/'+id+'/reply',d) }
+
+export const outletApi = {
+  list:p=>request.get('/api/outlets',{params:p}),
+  detail:id=>request.get('/api/outlets/'+id),
+  add:d=>request.post('/api/admin/outlets',d),
+  update:(id,d)=>request.put('/api/admin/outlets/'+id,d),
+  status:(id,status)=>request.put('/api/admin/outlets/'+id+'/status',null,{params:{status}})
+}
+
+export const routeApi = {
+  list:p=>request.get('/api/routes',{params:p}),
+  add:d=>request.post('/api/admin/routes',d),
+  update:(id,d)=>request.put('/api/admin/routes/'+id,d),
+  status:(id,status)=>request.put('/api/admin/routes/'+id+'/status',null,{params:{status}})
+}
+
+export const orderApi = {
+  create:d=>request.post('/api/orders',d),
+  my:status=>request.get('/api/orders/my',{params:{status}}),
+  cancel:id=>request.put('/api/orders/'+id+'/cancel'),
+  track:(orderNo,senderName)=>request.get('/api/orders/track',{params:{orderNo,senderName}})
+}
+
+export const specialistOrderApi = {
+  list:p=>request.get('/api/specialist/orders',{params:p}),
+  collect:(id,outletId)=>request.put('/api/specialist/orders/'+id+'/collect',null,{params:{outletId}}),
+  sort:(id,outletId)=>request.put('/api/specialist/orders/'+id+'/sort',null,{params:{outletId}}),
+  transit:(id,description,outletId)=>request.put('/api/specialist/orders/'+id+'/transit',null,{params:{description,outletId}}),
+  delivery:id=>request.put('/api/specialist/orders/'+id+'/delivery'),
+  sign:(id,receiverSignature)=>request.put('/api/specialist/orders/'+id+'/sign',null,{params:{receiverSignature}}),
+  abnormal:(id,reason)=>request.put('/api/specialist/orders/'+id+'/abnormal',null,{params:{reason}})
+}
+
+export const adminOrderApi = {
+  list:p=>request.get('/api/admin/orders',{params:p}),
+  stat:p=>request.get('/api/admin/orders/statistics',{params:p}),
+  export:p=>request.get('/api/admin/orders/export',{params:p,responseType:'blob'})
+}

@@ -8,9 +8,9 @@
     <relativePath/>
   </parent>
   <groupId>com.example</groupId>
-  <artifactId>tourism-backend</artifactId>
+  <artifactId>logistics-backend</artifactId>
   <version>1.0.0</version>
-  <name>tourism-backend</name>
+  <name>logistics-backend</name>
   <properties>
     <java.version>21</java.version>
     <maven.compiler.release>21</maven.compiler.release>
