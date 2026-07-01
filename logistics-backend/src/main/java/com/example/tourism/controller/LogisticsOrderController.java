@@ -301,7 +301,7 @@ public class LogisticsOrderController {
 
     // 统计报表数据
     @GetMapping("/admin/orders/statistics")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('SPECIALIST')")
     public Result<Map<String, Object>> statistics(@RequestParam(required = false) Long outletId,
                                                   @RequestParam(required = false) String startDate,
                                                   @RequestParam(required = false) String endDate) {
